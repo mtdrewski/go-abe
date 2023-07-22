@@ -25,10 +25,10 @@ type MasterSecretKey struct {
 }
 
 // Structure to represent the user's private key
-type PrivateKey struct {
+type UserPrivateKey struct {
 	Attributes []string
 	D          *pbc.Element
-	Dj         [][]*pbc.Element
+	Dj         map[string][]*pbc.Element
 }
 
 type NodeType string
@@ -42,16 +42,16 @@ const (
 type Node struct {
 	Type       NodeType
 	Attribute  string
-	Index      *pbc.Element
 	Children   []*Node
+	Index      *pbc.Element
 	Polynomial []*pbc.Element
+	LeafCy     [2]*pbc.Element
 }
 
 type CipherText struct {
 	RootNode *Node
 	Ctilda   *pbc.Element
 	C        *pbc.Element
-	Cy       [][]*pbc.Element
 }
 
 // Generate public and master secret keys
@@ -91,25 +91,28 @@ func Setup() (PublicKey, MasterSecretKey) {
 }
 
 // Generate a private key for a user with the specified attributes
-func KeyGen(pk PublicKey, msk MasterSecretKey, attributes []string) PrivateKey {
+func KeyGen(pk PublicKey, msk MasterSecretKey, attributes []string) UserPrivateKey {
 
 	r := pk.Pairing.NewZr().Rand()
-	Dj := make([][]*pbc.Element, len(attributes))
-	for i, attr := range attributes {
-		Dj[i] = make([]*pbc.Element, 2)
+	Dj := make(map[string][]*pbc.Element, len(attributes))
+
+	for _, attr := range attributes {
+		Dj[attr] = make([]*pbc.Element, 2)
 		rj := pk.Pairing.NewZr().Rand()
 		attrHash := pk.Pairing.NewG1().SetFromStringHash(attr, crypto.SHA256.New())
 		//Dj[i][0] = D_j = g^r*H(attrHash)^r
-		Dj[i][0] = pk.Pairing.NewG1().Mul(
+		Dj[attr][0] = pk.Pairing.NewG1().Mul(
 			pk.Pairing.NewG1().PowZn(pk.G, r),
 			pk.Pairing.NewG1().PowZn(attrHash, r))
 		//Dj[i][1] = D_j' = g^rj
-		Dj[i][1] = pk.Pairing.NewG1().PowZn(pk.G, rj)
+		Dj[attr][1] = pk.Pairing.NewG1().PowZn(pk.G, rj)
 	}
 
-	return PrivateKey{
+	// g^(alpha+r)
+	gAlphaR := pk.Pairing.NewG1().Mul(msk.Galpha, pk.Pairing.NewG1().PowZn(pk.G, r))
+	return UserPrivateKey{
 		Attributes: attributes,
-		D:          r,
+		D:          pk.Pairing.NewG1().PowZn(gAlphaR, pk.Pairing.NewZr().Invert(msk.Beta)), //g^(alpha+r)/beta
 		Dj:         Dj,
 	}
 }
@@ -119,8 +122,6 @@ func Encrypt(pk PublicKey, message int, accesPolicy string) CipherText {
 	rootNode := accesPolicyToAccessTree(accesPolicy, pk.Pairing)
 	s := pk.Pairing.NewZr().Rand()
 
-	Cy := make([][]*pbc.Element, len(rootNode.Children))
-
 	if rootNode.Type == AndNode {
 		rootNode.Polynomial = make([]*pbc.Element, len(rootNode.Children))
 		rootNode.Polynomial[0] = s
@@ -128,19 +129,17 @@ func Encrypt(pk PublicKey, message int, accesPolicy string) CipherText {
 			rootNode.Polynomial[i] = pk.Pairing.NewZr().Rand()
 		}
 
-		for i, childNode := range rootNode.Children {
+		for _, childNode := range rootNode.Children {
 			if childNode.Type == LeafNode {
 				childNode.Polynomial = make([]*pbc.Element, 1)
 				childNode.Polynomial[0] = computePolynomialAtX(rootNode.Polynomial, childNode.Index, pk.Pairing)
-				Cy[i] = make([]*pbc.Element, 2)
-				Cy[i][0] = pk.Pairing.NewG1().PowZn(pk.G, childNode.Polynomial[0])
-				Cy[i][1] = pk.Pairing.NewG1().PowZn(
+				childNode.LeafCy[0] = pk.Pairing.NewG1().PowZn(pk.G, childNode.Polynomial[0])
+				childNode.LeafCy[1] = pk.Pairing.NewG1().PowZn(
 					pk.Pairing.NewG1().SetFromStringHash(childNode.Attribute, crypto.SHA256.New()),
 					childNode.Polynomial[0])
 			} else {
 				fmt.Println("oops, not implemented yet!")
 			}
-			fmt.Println(childNode)
 		}
 	} else {
 		fmt.Println("oops, not implemented yet!")
@@ -151,20 +150,8 @@ func Encrypt(pk PublicKey, message int, accesPolicy string) CipherText {
 		Ctilda: pk.Pairing.NewGT().MulInt32(
 			pk.Pairing.NewGT().PowZn(pk.EggAlpha, s),
 			int32(message)),
-		C:  pk.Pairing.NewG1().PowZn(pk.H, s),
-		Cy: Cy,
+		C: pk.Pairing.NewG1().PowZn(pk.H, s),
 	}
-}
-
-func computePolynomialAtX(polynomial []*pbc.Element, x *pbc.Element, pairing *pbc.Pairing) *pbc.Element {
-
-	val := polynomial[0]
-	for i := 1; i < len(polynomial); i++ {
-		val = pairing.NewZr().Add(val,
-			pairing.NewZr().Mul(polynomial[i],
-				pairing.NewZr().PowZn(x, pairing.NewZr().SetInt32(int32(i)))))
-	}
-	return val
 }
 
 func accesPolicyToAccessTree(accesPolicy string, pairing *pbc.Pairing) *Node {
@@ -184,3 +171,33 @@ func accesPolicyToAccessTree(accesPolicy string, pairing *pbc.Pairing) *Node {
 		Index:    pairing.NewZr().SetInt32(1),
 	}
 }
+
+func computePolynomialAtX(polynomial []*pbc.Element, x *pbc.Element, pairing *pbc.Pairing) *pbc.Element {
+
+	val := polynomial[0]
+	for i := 1; i < len(polynomial); i++ {
+		val = pairing.NewZr().Add(val,
+			pairing.NewZr().Mul(polynomial[i],
+				pairing.NewZr().PowZn(x, pairing.NewZr().SetInt32(int32(i)))))
+	}
+	return val
+}
+
+func Decrypt(cipthertext CipherText, userPrivateKey UserPrivateKey) int {
+	//	result := runDecryptRecursively(cipthertext, userPrivateKey, cipthertext.RootNode)
+
+	return 0
+}
+
+/*
+func runDecryptRecursively(cipthertext CipherText, userPrivateKey UserPrivateKey, node *Node) *pbc.Element {
+	pairing := userPrivateKey.D.Pairing()
+	if node.Type == LeafNode {
+		numerator := pairing.NewGT().Pair()
+		denominator :=
+	}
+	childResult := runDecryptRecursively(cipthertext, userPrivateKey, node.Children[0])
+	return childResult
+
+}
+*/

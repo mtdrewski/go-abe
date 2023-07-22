@@ -1,7 +1,9 @@
-package cpabe
+package cpabe_test
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestSetup(t *testing.T) {
+func TestKeyGen(t *testing.T) {
 
 }
