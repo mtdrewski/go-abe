@@ -13,9 +13,9 @@ func main() {
 	pk, msk := cpabe.Setup()
 
 	//Step 2 - Encrypt the message based on the given accessPolicy and public key
-	message := 123
+	message := "Hello, World"
 	accessPolicy := "attr2"
-	cipherText := cpabe.Encrypt(pk, message, accessPolicy)
+	cipherText := cpabe.Encrypt(pk, []byte(message), accessPolicy)
 
 	//Step 3 - Based on the setup keys, given set of attributes user has, generate private key identified with this set
 	attributes := []string{"attr1", "attr2", "attr3"}
