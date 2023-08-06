@@ -20,4 +20,10 @@ func TestSetup(t *testing.T) {
 	if !pk.G.Equals(fBeta) {
 		t.Errorf("%d is not equal %d", pk.G, fBeta)
 	}
+
+	//test e(g^alpha,g) == e(g,g)^alpha
+	eggAlpha := pk.Pairing.NewGT().Pair(msk.Galpha, pk.G)
+	if !eggAlpha.Equals(pk.EggAlpha) {
+		t.Errorf("%d is not equal %d", eggAlpha, pk.EggAlpha)
+	}
 }
