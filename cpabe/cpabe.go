@@ -179,13 +179,11 @@ func KeyGen(pk PublicKey, msk MasterSecretKey, attributes []string) UserPrivateK
 }
 
 func Decrypt(cipthertext CipherText, userPrivateKey UserPrivateKey, pk PublicKey) *pbc.Element {
-	A := runDecryptRecursively(cipthertext, userPrivateKey, cipthertext.RootNode) //TODO: Does not return A=eggrs
+	A := runDecryptRecursively(cipthertext, userPrivateKey, cipthertext.RootNode)
 	pairing := userPrivateKey.D.Pairing()
 
-	partOne := pairing.NewGT().Pair(cipthertext.C, userPrivateKey.D)
-	partTwo := pairing.NewGT().Div(partOne, A)
-	message := pairing.NewGT().Div(cipthertext.Ctilda, partTwo)
-	return message
+	messageHash := pairing.NewGT().Div(cipthertext.Ctilda, pairing.NewGT().Div(pairing.NewGT().Pair(cipthertext.C, userPrivateKey.D), A))
+	return messageHash
 }
 
 func runDecryptRecursively(cipthertext CipherText, userPrivateKey UserPrivateKey, node *Node) *pbc.Element {
@@ -197,9 +195,39 @@ func runDecryptRecursively(cipthertext CipherText, userPrivateKey UserPrivateKey
 			denominator := pairing.NewGT().Pair(Di[1], node.LeafCy[1])
 			return pairing.NewGT().Div(numerator, denominator)
 		} else {
-			return pairing.NewGT().Rand() //attribute is not in the set
+			return pairing.NewGT() //Attribute is not in the set
 		}
 	}
-	childResult := runDecryptRecursively(cipthertext, userPrivateKey, node.Children[0])
-	return childResult
+	childResults := make([]*pbc.Element, len(node.Children))
+	for i, childNode := range node.Children {
+		childResults[i] = runDecryptRecursively(cipthertext, userPrivateKey, childNode)
+		//if childResults[i].Equals(pairing.NewGT()) && node.Type == AndNode{
+		//	return pairing.NewGT()
+		//}
+	}
+
+	//TODO: Obliczyc ze wspolczynnikiem lagrange'a
+	lagrangeSet := make([]*pbc.Element, len(node.Children))
+	for i := range node.Children {
+		lagrangeSet[i] = pairing.NewZr().SetInt32(int32(i + 1))
+	}
+
+	result := pairing.NewGT()
+	for i, childNode := range node.Children {
+		pow := computeLagrangeAtIndex(lagrangeSet, childNode.Index)
+		result = pairing.NewGT().Mul(result, pairing.NewGT().PowZn(childResults[i], pow))
+	}
+	return result
+}
+
+func computeLagrangeAtIndex(lagrangeSet []*pbc.Element, index *pbc.Element) *pbc.Element {
+	pairing := index.Pairing()
+	result := pairing.NewZr().Set1()
+	for _, elem := range lagrangeSet {
+		if !elem.Equals(index) {
+			result = pairing.NewZr().Mul(result, pairing.NewZr().Div(elem, pairing.NewZr().Sub(elem, index)))
+		}
+	}
+
+	return result
 }
