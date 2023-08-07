@@ -12,11 +12,11 @@ func main() {
 	//Step 1 - Setup public key and master secret key
 	pk, msk := cpabe.Setup()
 	//Step 2 - Encrypt the message based on the given accessPolicy and public key
-	message := "Hello, World"
+	message := "Hello, World!"
 
 	accessPolicy := cpabe.AccesPolicy{
 		ElemType: cpabe.AndNode,
-		Children: []cpabe.AccesPolicy{
+		Children: []*cpabe.AccesPolicy{
 			{
 				ElemType:  cpabe.LeafNode,
 				Attribute: "attr1",
@@ -27,7 +27,7 @@ func main() {
 			},
 			{
 				ElemType: cpabe.OrNode,
-				Children: []cpabe.AccesPolicy{
+				Children: []*cpabe.AccesPolicy{
 					{
 						ElemType:  cpabe.LeafNode,
 						Attribute: "attr3",
@@ -40,8 +40,7 @@ func main() {
 			},
 		},
 	}
-
-	cipherText := cpabe.Encrypt(pk, []byte(message), accessPolicy)
+	cipherText := cpabe.Encrypt(pk, []byte(message), &accessPolicy)
 
 	//Step 3 - Based on the setup keys, given set of attributes user has, generate private key identified with this set
 	attributes := []string{"attr1", "attr2", "attr3", "attr4"}
@@ -49,5 +48,10 @@ func main() {
 
 	//Step 4 - Decrypt the message based on generated private key
 	decryptedMessageHash := cpabe.Decrypt(cipherText, userPrivateKey, pk)
-	fmt.Println(decryptedMessageHash.Equals(pk.Pairing.NewGT().SetFromHash([]byte(message))))
+
+	if decryptedMessageHash.Equals(pk.Pairing.NewGT().SetFromHash([]byte(message))) {
+		fmt.Println("User with given attributes is able to access the message")
+	} else {
+		fmt.Println("User with given attributes is not able to access the message")
+	}
 }

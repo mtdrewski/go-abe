@@ -39,7 +39,7 @@ const (
 type AccesPolicy struct {
 	ElemType  NodeType
 	Attribute string
-	Children  []AccesPolicy
+	Children  []*AccesPolicy
 }
 
 type Node struct {
@@ -92,7 +92,7 @@ func Setup() (PublicKey, MasterSecretKey) {
 	return pk, msk
 }
 
-func Encrypt(pk PublicKey, messageHash []byte, accesPolicy AccesPolicy) CipherText {
+func Encrypt(pk PublicKey, messageHash []byte, accesPolicy *AccesPolicy) CipherText {
 
 	rootNode := accesPolicyToAccessTree(pk, accesPolicy, 1)
 	encryptNode(pk, rootNode, nil)
@@ -105,7 +105,7 @@ func Encrypt(pk PublicKey, messageHash []byte, accesPolicy AccesPolicy) CipherTe
 	}
 }
 
-func accesPolicyToAccessTree(pk PublicKey, accesPolicy AccesPolicy, index int) *Node {
+func accesPolicyToAccessTree(pk PublicKey, accesPolicy *AccesPolicy, index int) *Node {
 
 	if accesPolicy.ElemType == LeafNode {
 		return &Node{
