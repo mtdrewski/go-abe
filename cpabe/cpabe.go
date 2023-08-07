@@ -127,17 +127,24 @@ func accesPolicyToAccessTree(pk PublicKey, accesPolicy AccesPolicy, index int) *
 }
 
 func encryptNode(pk PublicKey, node *Node, parent *Node) {
-	if parent == nil { //rootNode
-		s := pk.Pairing.NewZr().Rand()
+
+	if node.Type == AndNode {
 		node.Polynomial = make([]*pbc.Element, len(node.Children))
-		node.Polynomial[0] = s
-		for i := 1; i < len(node.Children); i++ {
-			node.Polynomial[i] = pk.Pairing.NewZr().Rand()
-		}
-	}
-	if node.Type == LeafNode {
+	} else {
 		node.Polynomial = make([]*pbc.Element, 1)
+	}
+
+	if parent == nil { //Root node
+		node.Polynomial[0] = pk.Pairing.NewZr().Rand()
+	} else {
 		node.Polynomial[0] = computePolynomialAtX(pk, parent.Polynomial, node.Index)
+	}
+
+	for i := 1; i < len(node.Polynomial); i++ {
+		node.Polynomial[i] = pk.Pairing.NewZr().Rand()
+	}
+
+	if node.Type == LeafNode {
 		node.LeafCy[0] = pk.Pairing.NewG1().PowZn(pk.G, node.Polynomial[0])
 		node.LeafCy[1] = pk.Pairing.NewG1().PowZn(
 			pk.Pairing.NewG1().SetFromHash([]byte(node.Attribute)),
@@ -195,6 +202,7 @@ func Decrypt(cipthertext CipherText, userPrivateKey UserPrivateKey, pk PublicKey
 }
 
 func runDecryptRecursively(cipthertext CipherText, userPrivateKey UserPrivateKey, node *Node) *pbc.Element {
+
 	pairing := userPrivateKey.D.Pairing()
 	if node.Type == LeafNode {
 		Di, exists := userPrivateKey.Dj[node.Attribute]
@@ -206,32 +214,37 @@ func runDecryptRecursively(cipthertext CipherText, userPrivateKey UserPrivateKey
 			return pairing.NewGT() //Attribute is not in the set
 		}
 	}
+
+	lagrangeSet := map[*pbc.Element]bool{}
 	childResults := make([]*pbc.Element, len(node.Children))
 	for i, childNode := range node.Children {
 		childResults[i] = runDecryptRecursively(cipthertext, userPrivateKey, childNode)
-		//if childResults[i].Equals(pairing.NewGT()) && node.Type == AndNode{
-		//	return pairing.NewGT()
-		//}
+		if childResults[i].Equals(pairing.NewGT()) {
+			if node.Type == AndNode {
+				return pairing.NewGT()
+			}
+		} else if node.Type == OrNode {
+			return childResults[i]
+		} else {
+			lagrangeSet[childNode.Index] = true
+		}
 	}
 
 	//compute F_x using lagrange coefficient
-	lagrangeSet := make([]*pbc.Element, len(node.Children))
-	for i := range node.Children {
-		lagrangeSet[i] = pairing.NewZr().SetInt32(int32(i + 1))
-	}
-
 	result := pairing.NewGT()
 	for i, childNode := range node.Children {
-		pow := computeLagrangeAtIndex(lagrangeSet, childNode.Index)
-		result = pairing.NewGT().Mul(result, pairing.NewGT().PowZn(childResults[i], pow))
+		if _, ok := lagrangeSet[childNode.Index]; ok {
+			pow := computeLagrangeAtIndex(lagrangeSet, childNode.Index)
+			result = pairing.NewGT().Mul(result, pairing.NewGT().PowZn(childResults[i], pow))
+		}
 	}
 	return result
 }
 
-func computeLagrangeAtIndex(lagrangeSet []*pbc.Element, index *pbc.Element) *pbc.Element {
+func computeLagrangeAtIndex(lagrangeSet map[*pbc.Element]bool, index *pbc.Element) *pbc.Element {
 	pairing := index.Pairing()
 	result := pairing.NewZr().Set1()
-	for _, elem := range lagrangeSet {
+	for elem := range lagrangeSet {
 		if !elem.Equals(index) {
 			result = pairing.NewZr().Mul(result, pairing.NewZr().Div(elem, pairing.NewZr().Sub(elem, index)))
 		}

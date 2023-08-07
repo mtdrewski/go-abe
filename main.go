@@ -25,20 +25,19 @@ func main() {
 				ElemType:  cpabe.LeafNode,
 				Attribute: "attr2",
 			},
-			/*
-				{
-					ElemType: cpabe.AndNode,
-					Children: []cpabe.AccesPolicy{
-						{
-							ElemType:  cpabe.LeafNode,
-							Attribute: "attr2",
-						},
-						{
-							ElemType:  cpabe.LeafNode,
-							Attribute: "attr3",
-						},
+			{
+				ElemType: cpabe.OrNode,
+				Children: []cpabe.AccesPolicy{
+					{
+						ElemType:  cpabe.LeafNode,
+						Attribute: "attr3",
 					},
-				},*/
+					{
+						ElemType:  cpabe.LeafNode,
+						Attribute: "attr5",
+					},
+				},
+			},
 		},
 	}
 
