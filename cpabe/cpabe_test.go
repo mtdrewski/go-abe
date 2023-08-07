@@ -1,6 +1,7 @@
 package cpabe_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/mtdrewski/go-abe/cpabe"
@@ -25,5 +26,22 @@ func TestSetup(t *testing.T) {
 	eggAlpha := pk.Pairing.NewGT().Pair(msk.Galpha, pk.G)
 	if !eggAlpha.Equals(pk.EggAlpha) {
 		t.Errorf("%d is not equal %d", eggAlpha, pk.EggAlpha)
+	}
+}
+
+type ExampleTestCase struct {
+	name         string
+	accessPolicy string
+}
+
+func ExampleTests(t *testing.T) {
+	exampleTestCase := []ExampleTestCase{
+		{
+			name:         "test1",
+			accessPolicy: "attr1",
+		},
+	}
+	for _, tt := range exampleTestCase {
+		fmt.Println(tt)
 	}
 }

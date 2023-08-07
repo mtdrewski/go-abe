@@ -13,7 +13,35 @@ func main() {
 	pk, msk := cpabe.Setup()
 	//Step 2 - Encrypt the message based on the given accessPolicy and public key
 	message := "Hello, World"
-	accessPolicy := "attr2 attr3 attr4"
+
+	accessPolicy := cpabe.AccesPolicy{
+		ElemType: cpabe.AndNode,
+		Children: []cpabe.AccesPolicy{
+			{
+				ElemType:  cpabe.LeafNode,
+				Attribute: "attr1",
+			},
+			{
+				ElemType:  cpabe.LeafNode,
+				Attribute: "attr2",
+			},
+			/*
+				{
+					ElemType: cpabe.AndNode,
+					Children: []cpabe.AccesPolicy{
+						{
+							ElemType:  cpabe.LeafNode,
+							Attribute: "attr2",
+						},
+						{
+							ElemType:  cpabe.LeafNode,
+							Attribute: "attr3",
+						},
+					},
+				},*/
+		},
+	}
+
 	cipherText := cpabe.Encrypt(pk, []byte(message), accessPolicy)
 
 	//Step 3 - Based on the setup keys, given set of attributes user has, generate private key identified with this set

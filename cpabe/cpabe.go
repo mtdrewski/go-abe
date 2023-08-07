@@ -2,7 +2,6 @@ package cpabe
 
 import (
 	_ "crypto/sha256"
-	"strings"
 
 	"github.com/Nik-U/pbc"
 )
@@ -36,6 +35,12 @@ const (
 	OrNode   NodeType = "OrNode"
 	LeafNode NodeType = "LeafNode"
 )
+
+type AccesPolicy struct {
+	ElemType  NodeType
+	Attribute string
+	Children  []AccesPolicy
+}
 
 type Node struct {
 	Type       NodeType
@@ -87,9 +92,9 @@ func Setup() (PublicKey, MasterSecretKey) {
 	return pk, msk
 }
 
-func Encrypt(pk PublicKey, messageHash []byte, accesPolicy string) CipherText {
+func Encrypt(pk PublicKey, messageHash []byte, accesPolicy AccesPolicy) CipherText {
 
-	rootNode := accesPolicyToAccessTree(pk, accesPolicy)
+	rootNode := accesPolicyToAccessTree(pk, accesPolicy, 1)
 	encryptNode(pk, rootNode, nil)
 
 	M := pk.Pairing.NewGT().SetFromHash(messageHash)
@@ -100,21 +105,24 @@ func Encrypt(pk PublicKey, messageHash []byte, accesPolicy string) CipherText {
 	}
 }
 
-func accesPolicyToAccessTree(pk PublicKey, accesPolicy string) *Node {
+func accesPolicyToAccessTree(pk PublicKey, accesPolicy AccesPolicy, index int) *Node {
 
-	children := make([]*Node, len(strings.Split(accesPolicy, " ")))
-	for i, attr := range strings.Split(accesPolicy, " ") {
-		children[i] = &Node{
+	if accesPolicy.ElemType == LeafNode {
+		return &Node{
 			Type:      LeafNode,
-			Attribute: attr,
-			Index:     pk.Pairing.NewZr().SetInt32(int32(i + 1)),
+			Attribute: accesPolicy.Attribute,
+			Index:     pk.Pairing.NewZr().SetInt32(int32(index)),
 		}
 	}
+	children := make([]*Node, len(accesPolicy.Children))
 
+	for i, child := range accesPolicy.Children {
+		children[i] = accesPolicyToAccessTree(pk, child, i+1)
+	}
 	return &Node{
-		Type:     AndNode,
+		Type:     accesPolicy.ElemType,
 		Children: children,
-		Index:    pk.Pairing.NewZr().SetInt32(1),
+		Index:    pk.Pairing.NewZr().SetInt32(int32(index)),
 	}
 }
 
@@ -206,7 +214,7 @@ func runDecryptRecursively(cipthertext CipherText, userPrivateKey UserPrivateKey
 		//}
 	}
 
-	//TODO: Obliczyc ze wspolczynnikiem lagrange'a
+	//compute F_x using lagrange coefficient
 	lagrangeSet := make([]*pbc.Element, len(node.Children))
 	for i := range node.Children {
 		lagrangeSet[i] = pairing.NewZr().SetInt32(int32(i + 1))
