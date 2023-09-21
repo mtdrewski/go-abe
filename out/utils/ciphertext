@@ -1,0 +1,112 @@
+{
+ "RootNode": {
+  "Type": "OrNode",
+  "Attribute": "",
+  "Children": [
+   {
+    "Type": "LeafNode",
+    "Attribute": "Name:Bajtazar",
+    "Children": null,
+    "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAE=",
+    "Polynomial": [
+     "RrZG4ACGfO8E4rVGqZwzqNureZc="
+    ],
+    "LeafCy": [
+     "DLAkOWIg5p+JL+zFzJ8i6UEQh2gP1C1gzHBtMqQsmz1wsP8YVr5K7U3mX1DfL5UBlvYT9SOEStUpQl0flsBx+C/kjB0ua2XyiqWD6W7IGt9vK8ByzT1FFfGjYOw4JEijxSYVty5cFbxBN1CNddbJlewcHEzDvLwLZWbdX4kDYTs=",
+     "Td7bCr1J7C6/nQ+KJixAj+P6AhuKygZ5XlviUPzcS7e97DvT+pnsJvgOsE2j/cjtmHtui9a5bYYql3B3zQrbcCTrpd5aa3xauljKzJJ7CDwA9idCLISW9Ye5Tt1ebcfQzmtn5M9LbsabmMK2dr8altfKC5iQzq6TEcdf0jAPlvk="
+    ]
+   },
+   {
+    "Type": "LeafNode",
+    "Attribute": "Position:Director",
+    "Children": null,
+    "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAI=",
+    "Polynomial": [
+     "RrZG4ACGfO8E4rVGqZwzqNureZc="
+    ],
+    "LeafCy": [
+     "DLAkOWIg5p+JL+zFzJ8i6UEQh2gP1C1gzHBtMqQsmz1wsP8YVr5K7U3mX1DfL5UBlvYT9SOEStUpQl0flsBx+C/kjB0ua2XyiqWD6W7IGt9vK8ByzT1FFfGjYOw4JEijxSYVty5cFbxBN1CNddbJlewcHEzDvLwLZWbdX4kDYTs=",
+     "SOff4uJ0YdwijbICt6PxmAWM2vQ/CQPjggTThoa55dIIEuYtp9dwghjQ+thurWv+qlP3e5oSqlgECRlzIYoCvVj74yjvn6cJyLUlopcjiAscKKKShR9TxvCLCLuE1ewkAjSFOcZUxK9sS0NyGJzmtgdYpALu5b3vEy8uzMQRmm4="
+    ]
+   },
+   {
+    "Type": "AndNode",
+    "Attribute": "",
+    "Children": [
+     {
+      "Type": "LeafNode",
+      "Attribute": "Division:Infosecurity",
+      "Children": null,
+      "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAE=",
+      "Polynomial": [
+       "T5bXoGqhQ9gSefsaXy6tUAXIlkc="
+      ],
+      "LeafCy": [
+       "VUdUgka1JIRzgq+HImLagxo6t7v46JM4QK+3qbqbTDfzTGMJxLEcxs03+0ohsE6M9Gq7uO5oP/vOa6LrcJ3SIRvptgwwNRtadNgEe+m1q9wto7XMhSc4U2oXRubAa2GuL1RBvJ/kNwuX+FyntA8GUvk3yhsjMRJbltKSmv2+gg0=",
+       "KING/zi/+VRpf7uXc0c/QHfeVXDxANEjysA9KOqIUSqa7vbRMloIpdZK/6R8T0NO3hwNPhkO22M8eTMNqPwiKC6laLJzCU9WSLQX8bPvqG8AV1cC/jX3LQPw3/lkRTmOFzskVtsjl3ulKETm83ktzgjKLxVHLulbBtWzeTM/9FE="
+      ]
+     },
+     {
+      "Type": "OrNode",
+      "Attribute": "",
+      "Children": [
+       {
+        "Type": "LeafNode",
+        "Attribute": "Location:Krakow",
+        "Children": null,
+        "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAE=",
+        "Polynomial": [
+         "WHdoYNS8CsEgEUDuFMEm9y/lsvc="
+        ],
+        "LeafCy": [
+         "QVZrDDMnT5Lb5kkkc8Gdv2V8o3AfWGRe/dcDMt5ncJLATpcRld155oPThx74BGIyXGDBJN3QycZWmY1z3vcysgR/inN4774A2KDeiHu2oWbrfToLb54AWk8MtL3mnmsen35amZfLnu26nwrauigO3tb5jT7QZz99p5PqJl/lBP0=",
+         "AmErtnKcVJKuMl9gGUpACJHysSuZIzo47zh3Dq0quOU48m/Tt5VOfY1fJynmMAz09Z/DczCfBwLr5nQENNqZ2SOMLWbHqJwfVQ3aAyT+O/vhjvINXmgb4LxOGXN/SSUUtgaupe83Owsng8aapssEl44ZqSLVvKQx1CVpFwZZPHU="
+        ]
+       },
+       {
+        "Type": "LeafNode",
+        "Attribute": "Location:Suwalki",
+        "Children": null,
+        "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAI=",
+        "Polynomial": [
+         "WHdoYNS8CsEgEUDuFMEm9y/lsvc="
+        ],
+        "LeafCy": [
+         "QVZrDDMnT5Lb5kkkc8Gdv2V8o3AfWGRe/dcDMt5ncJLATpcRld155oPThx74BGIyXGDBJN3QycZWmY1z3vcysgR/inN4774A2KDeiHu2oWbrfToLb54AWk8MtL3mnmsen35amZfLnu26nwrauigO3tb5jT7QZz99p5PqJl/lBP0=",
+         "EdFMs3cfdA8GWu9EShyVYtAx6o7kFD0sbbJfgOVK0eminvd18Rnd7Sc7uGyUYuPhhRerPHqQOlnJ3wfBrLhLTBnOjS7jkVd3eM4uC3AAlp+3sZIgq1VJVRK/Yk3j1deiV4T6CJpOatoX0Tv3T12cqzlJGy5LlIfsZs345Fwfmf0="
+        ]
+       }
+      ],
+      "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAI=",
+      "Polynomial": [
+       "WHdoYNS8CsEgEUDuFMEm9y/lsvc="
+      ],
+      "LeafCy": [
+       null,
+       null
+      ]
+     }
+    ],
+    "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAM=",
+    "Polynomial": [
+     "RrZG4ACGfO8E4rVGqZwzqNureZc=",
+     "COCQwGoaxukNl0XTtZJ5pyodHLA="
+    ],
+    "LeafCy": [
+     null,
+     null
+    ]
+   }
+  ],
+  "Index": "AAAAAAAAAAAAAAAAAAAAAAAAAAE=",
+  "Polynomial": [
+   "RrZG4ACGfO8E4rVGqZwzqNureZc="
+  ],
+  "LeafCy": [
+   null,
+   null
+  ]
+ },
+ "Ctilda": "K3ht/ht6VcNK2x2zCR02nZCUZgiPNXxUzSY2LwylLrrWYsU2IDHbHC6doPAZZE4+KdRoPXXUAeibfUe9stxyXSRhnNkILQnKp80sKPi7Xo2OS//VOv4drq8mjGf1g7WpO3WEXwau94cyKmDJxuR/eOs68fh5EYTVcSvT+8oOotg=",
+ "C": "X43a2SSnGmmms7OZTAszj0HFNRo6cjcSQmkDvq4MTHTAPFk7ZrwOReJlEbhDDs9MctMeoMC/Xpdvp3qjIzKvLBNmdmaElVfsnEzS4Klo7sbYdLbGRrE8Tu66wRV0no5eWtDvo7Cia3qoW3wGljE8HLxiqzWGiu3Y7h0YU9CHVOM="
+}

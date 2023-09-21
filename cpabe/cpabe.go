@@ -8,6 +8,7 @@ import (
 
 // Structure to represent the public key
 type PublicKey struct {
+	Params   *pbc.Params
 	Pairing  *pbc.Pairing
 	G        *pbc.Element
 	H        *pbc.Element
@@ -60,7 +61,8 @@ type CipherText struct {
 // Generate public and master secret keys
 func Setup() (PublicKey, MasterSecretKey) {
 
-	pairing := pbc.GenerateA(160, 512).NewPairing()
+	params := pbc.GenerateA(160, 512)
+	pairing := params.NewPairing()
 	g := pairing.NewG1().Rand()
 
 	alpha := pairing.NewZr().Rand()
@@ -78,6 +80,7 @@ func Setup() (PublicKey, MasterSecretKey) {
 	gAlpha := pairing.NewG1().PowZn(g, alpha)
 
 	pk := PublicKey{
+		Params:   params,
 		Pairing:  pairing,
 		G:        g,
 		H:        h,
@@ -92,12 +95,11 @@ func Setup() (PublicKey, MasterSecretKey) {
 	return pk, msk
 }
 
-func Encrypt(pk PublicKey, messageHash []byte, accesPolicy *AccesPolicy) CipherText {
+func Encrypt(pk PublicKey, M *pbc.Element, accesPolicy *AccesPolicy) CipherText {
 
 	rootNode := accesPolicyToAccessTree(pk, accesPolicy, 1)
 	encryptNode(pk, rootNode, nil)
 
-	M := pk.Pairing.NewGT().SetFromHash(messageHash)
 	return CipherText{
 		RootNode: rootNode,
 		Ctilda:   pk.Pairing.NewGT().Mul(M, pk.Pairing.NewGT().PowZn(pk.EggAlpha, rootNode.Polynomial[0])),

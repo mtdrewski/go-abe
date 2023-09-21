@@ -1,0 +1,43 @@
+{
+ "ElemType": "OrNode",
+ "Attribute": "",
+ "Children": [
+  {
+   "ElemType": "LeafNode",
+   "Attribute": "Name:Bajtazar",
+   "Children": null
+  },
+  {
+   "ElemType": "LeafNode",
+   "Attribute": "Position:Director",
+   "Children": null
+  },
+  {
+   "ElemType": "AndNode",
+   "Attribute": "",
+   "Children": [
+    {
+     "ElemType": "LeafNode",
+     "Attribute": "Division:Infosecurity",
+     "Children": null
+    },
+    {
+     "ElemType": "OrNode",
+     "Attribute": "",
+     "Children": [
+        {
+            "ElemType": "LeafNode",
+            "Attribute": "Location:Krakow",
+            "Children": null
+        },
+        {
+            "ElemType": "LeafNode",
+            "Attribute": "Location:Suwalki",
+            "Children": null
+        }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,57 +1,35 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/mtdrewski/go-abe/cpabe"
 )
 
-// Example usage
 func main() {
 
-	//Step 1 - Setup public key and master secret key
-	pk, msk := cpabe.Setup()
-	//Step 2 - Encrypt the message based on the given accessPolicy and public key
-	message := "Hello, World!"
-
-	accessPolicy := cpabe.AccesPolicy{
-		ElemType: cpabe.AndNode,
-		Children: []*cpabe.AccesPolicy{
-			{
-				ElemType:  cpabe.LeafNode,
-				Attribute: "attr1",
-			},
-			{
-				ElemType:  cpabe.LeafNode,
-				Attribute: "attr2",
-			},
-			{
-				ElemType: cpabe.OrNode,
-				Children: []*cpabe.AccesPolicy{
-					{
-						ElemType:  cpabe.LeafNode,
-						Attribute: "attr3",
-					},
-					{
-						ElemType:  cpabe.LeafNode,
-						Attribute: "attr5",
-					},
-				},
-			},
-		},
-	}
-	cipherText := cpabe.Encrypt(pk, []byte(message), &accessPolicy)
-
-	//Step 3 - Based on the setup keys, given set of attributes user has, generate private key identified with this set
-	attributes := []string{"attr1", "attr2", "attr3", "attr4"}
-	userPrivateKey := cpabe.KeyGen(pk, msk, attributes)
-
-	//Step 4 - Decrypt the message based on generated private key
-	decryptedMessageHash := cpabe.Decrypt(cipherText, userPrivateKey, pk)
-
-	if decryptedMessageHash.Equals(pk.Pairing.NewGT().SetFromHash([]byte(message))) {
-		fmt.Println("User with given attributes is able to access the message")
-	} else {
-		fmt.Println("User with given attributes is not able to access the message")
+	switch operation := os.Args[1]; operation {
+	case "setup":
+		pk, msk := cpabe.Setup()
+		cpabe.ExportPublicKey(pk, "out/utils/public_key")
+		cpabe.ExportMasterSecretKey(msk, "out/utils/master_secret_key")
+	case "keygen":
+		pk := cpabe.ImportPublicKey("out/utils/public_key")
+		msk := cpabe.ImportMasterSecretKey("out/utils/master_secret_key", pk.Pairing)
+		attributes := cpabe.ImportAttributes("in/utils/attributes")
+		userPrivateKey := cpabe.KeyGen(pk, msk, attributes)
+		cpabe.ExportUserPrivateKey(userPrivateKey, "out/utils/user_private_key")
+	case "encrypt":
+		pk := cpabe.ImportPublicKey("out/utils/public_key")
+		accessPolicy := cpabe.ImportAccessPolicy("in/utils/access_policy")
+		M := cpabe.EncryptFile("in/files/input_file.txt", "out/files/encrypted_input.bin", pk.Pairing)
+		cipherText := cpabe.Encrypt(pk, M, &accessPolicy)
+		cpabe.ExportCipherText(cipherText, "out/utils/ciphertext")
+	case "decrypt":
+		pk := cpabe.ImportPublicKey("out/utils/public_key")
+		userPrivateKey := cpabe.ImportUserPrivateKey("out/utils/user_private_key", pk.Pairing)
+		cipherText := cpabe.ImportCiphertext("out/utils/ciphertext", pk.Pairing)
+		M := cpabe.Decrypt(cipherText, userPrivateKey, pk)
+		cpabe.DecryptFile("out/files/encrypted_input.bin", "out/files/decrypted_file.txt", M)
 	}
 }

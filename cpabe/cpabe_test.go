@@ -137,7 +137,8 @@ func TestExamples(t *testing.T) {
 	}
 	for _, tt := range exampleTestCase {
 		pk, msk := cpabe.Setup()
-		cipherText := cpabe.Encrypt(pk, []byte(tt.name), &tt.accessPolicy)
+		M := pk.Pairing.NewGT().SetFromHash([]byte(tt.name))
+		cipherText := cpabe.Encrypt(pk, M, &tt.accessPolicy)
 		userPrivateKey := cpabe.KeyGen(pk, msk, tt.userAttributes)
 		decryptedMessageHash := cpabe.Decrypt(cipherText, userPrivateKey, pk)
 
@@ -153,7 +154,8 @@ func TestBinaryTree(t *testing.T) {
 		message := "Binary tree"
 		pk, msk := cpabe.Setup()
 		accessTree := createBinaryAccessTree(depth, 1)
-		cipherText := cpabe.Encrypt(pk, []byte(message), accessTree)
+		M := pk.Pairing.NewGT().SetFromHash([]byte(message))
+		cipherText := cpabe.Encrypt(pk, M, accessTree)
 		attributes := []string{}
 
 		powerParam := int(math.Pow(2, float64(depth)))
